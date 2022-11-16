@@ -1,5 +1,4 @@
 name: Docker Image CI
-
 on:
   push:
     branches: [ "main" ]
@@ -9,19 +8,22 @@ on:
 jobs:
 
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: docker login
-      env:
-        DOCKERHUB_USERNAME: ${{secrets.DOCKERHUB_USERNAME}}
-        DOCKERHUB_TOKEN: ${{secrets.DOCKERHUB_TOKEN}}
-      run: |
-        docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN 
+    - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build -t pe-frontend . --file Dockerfile --tag latest
-      
-    - name: Docker Push
-      run: docker push latest
+      run: docker build . --file Dockerfile --tag latest
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Login to DockerHub Registry
+        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          push: true
+          tags: maxvdp/pe-frontend:latest
