@@ -7,7 +7,7 @@ import CollectionForm from './Form'
 
 class App extends Component{
 
-    API_URL="http://193.191.176.89:7000"
+    API_URL="http://193.191.176.89:8080"
 
     state = {
       products: [],
